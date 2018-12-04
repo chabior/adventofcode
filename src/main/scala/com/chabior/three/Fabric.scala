@@ -1,3 +1,5 @@
+package com.chabior.three
+
 case class Fabric(clientNumber: Int, left:Int, top: Int, width: Int, height: Int) {
     var coordinates: Map[Int, List[Int]] = Map.empty
     for (x <- left until (left + width)) {

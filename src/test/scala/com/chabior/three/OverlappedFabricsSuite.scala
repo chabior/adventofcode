@@ -1,3 +1,5 @@
+package com.chabior.three
+
 import org.scalatest.FlatSpec
 
 class OverlappedFabricsSuite extends FlatSpec {

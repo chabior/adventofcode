@@ -1,3 +1,5 @@
+package com.chabior.three
+
 object OverlappedFabrics {
   def count(fabrics: List[Fabric]): Int = {
     var mainFabric: Map[Int, List[Int]] = Map.empty[Int, List[Int]]

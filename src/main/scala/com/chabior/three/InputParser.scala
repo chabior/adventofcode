@@ -1,3 +1,5 @@
+package com.chabior.three
+
 import scala.io.Source
 
 object InputParser {
