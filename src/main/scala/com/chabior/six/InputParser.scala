@@ -18,40 +18,19 @@ object InputParser {
 
     val area = new Area(max, max)
     for (dataPoint <- dataPoints) {
-      area.distances(dataPoint)
+      area.total(dataPoint)
     }
 
-    var infinites = List.empty[Int]
+
+    var s = 0
     for ((x, ys) <- area.grid) {
-      for ((y, point) <- ys) {
-        if (x == 0 || y == 0 || x == max || y == max) {
-          infinites = infinites :+ point._1
+      for ((y, total) <- ys) {
+        if (total < 10000) {
+          s = s + 1
         }
       }
     }
-    infinites = infinites.distinct
-
-    var m = Map.empty[Int, Int]
-    for ((x, ys) <- area.grid) {
-      for ((y, point) <- ys) {
-        val k = m.getOrElse(point._1, 0) + 1
-        m = m + (point._1 -> k)
-      }
-    }
-
-    var maxV = 0
-    for ((label, size) <- m) {
-      val isNotInfinite = infinites.find(_ == label) match {
-        case Some(_) => false
-        case None => true
-      }
-
-      if (isNotInfinite && size > maxV) {
-        maxV = size
-      }
-    }
-
-    println(maxV)
+    println(s)
   }
 
 
