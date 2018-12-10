@@ -20,4 +20,12 @@ object InputParser {
 
     graph
   }
+
+  def parsePartTwo: Unit = {
+    Source.fromResource("steps_test").getLines.foreach(line => {
+      val pattern = "Step ([A-Z]{1}) must be finished before step ([A-Z]{1}) can begin.".r
+      val pattern(parent, child) = line
+
+    })
+  }
 }
