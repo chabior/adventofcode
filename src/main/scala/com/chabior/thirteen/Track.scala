@@ -1,6 +1,7 @@
 package com.chabior.thirteen
 
 class Track {
+  var withOutVehicles: Track = _
   var parts = Map.empty[Int, Map[Int, TrackPart]]
 
   def addPart(part:TrackPart, x: Int, y: Int): Unit = {
@@ -19,6 +20,25 @@ class Track {
     }
   }
 
+  def removeVehicles: Track = {
+    val track = new Track
+    for ((x, xs) <- parts) {
+      for ((y, part) <- xs) {
+        if (part.isMoving) {
+          part.sign match {
+            case ">" => track.addPart(new Horizontal, x, y)
+            case "<" => track.addPart(new Horizontal, x, y)
+            case "^" => track.addPart(new Vertical, x, y)
+            case "v" => track.addPart(new Vertical, x, y)
+          }
+        } else {
+          track.addPart(part, x, y)
+        }
+      }
+    }
+    track
+  }
+
   def print: Unit = {
     val xs = parts.keys.toList.sorted
     for (x <- xs) {
@@ -33,17 +53,18 @@ class Track {
 
   def tick: Track = {
     val track = new Track
+    track.withOutVehicles = withOutVehicles
     val maxX = parts.keys.toList.max
     val maxY = parts.toList.flatMap(x => x._2.keys).max
 
-    for (y <- 0 to maxY) {
-      for (x <- 0 to maxX) {
+    for (x <- 0 to maxX) {
+      for (y <- 0 to maxY) {
         parts(x).get(y) match {
           case None =>
           case Some(part) => {
             if (part.isMoving) {
               val coord = part.move(x, y)
-              val sign = parts(coord._1)(coord._2)
+              val sign = withOutVehicles.parts(coord._1)(coord._2)
               track.addPart(part.switchDirection(sign.sign), coord._1, coord._2)
               track.addPart(part.previousDirection, x, y)
             } else {

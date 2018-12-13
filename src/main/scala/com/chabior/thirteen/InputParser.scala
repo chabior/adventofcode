@@ -16,16 +16,15 @@ object InputParser {
       x = x + 1
     })
 
+    track.withOutVehicles = track.removeVehicles
     track
   }
 
   def main(args: Array[String]): Unit = {
     var track = parse
     track.print
-    for (i <- 1 to 20) {
-      println(i)
+    for (i <- 1 to 10000) {
       track = track.tick
-      track.print
     }
   }
 }
