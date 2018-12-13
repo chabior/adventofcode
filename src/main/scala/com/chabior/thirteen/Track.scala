@@ -42,10 +42,10 @@ class Track {
   def print: Unit = {
     val xs = parts.keys.toList.sorted
     for (x <- xs) {
-      val ys =parts(x).keys.toList.sorted
+      val ys = parts(x).keys.toList.sorted
       var line = ""
       for (y <- ys) {
-        line = line + parts(x)(y).sign
+        line = line + parts(x)(y).print
       }
       println(line)
     }
@@ -57,8 +57,8 @@ class Track {
     val maxX = parts.keys.toList.max
     val maxY = parts.toList.flatMap(x => x._2.keys).max
 
-    for (x <- 0 to maxX) {
-      for (y <- 0 to maxY) {
+    for (y <- 0 to maxY) {
+      for (x <- 0 to maxX) {
         parts(x).get(y) match {
           case None =>
           case Some(part) => {
@@ -66,7 +66,7 @@ class Track {
               val coord = part.move(x, y)
               val sign = withOutVehicles.parts(coord._1)(coord._2)
               track.addPart(part.switchDirection(sign.sign), coord._1, coord._2)
-              track.addPart(part.previousDirection, x, y)
+              track.addPart(withOutVehicles.parts(x)(y), x, y)
             } else {
               track.addPart(part, x, y)
             }
@@ -80,11 +80,11 @@ class Track {
 }
 
 trait TrackPart {
+  def print: String = sign
   def sign:String
   def isMoving: Boolean = false
   def move(x: Int, y: Int): (Int, Int) = (0, 0)
   def switchDirection(newPositionSign: String) :TrackPart = this
-  def previousDirection: TrackPart = this
 }
 class Intersection extends TrackPart {
   override def sign: String = "+"
@@ -102,10 +102,12 @@ class BackSlash extends TrackPart {
   override def sign: String = "\\"
 }
 
-class Vehicle(s: String, lastDirection: Int = 2, previous: Option[String] = None) extends TrackPart {
+class Vehicle(s: String, lastDirection: Int = 2) extends TrackPart {
   val directions = Map(0 -> "left", 1 -> "straight", 2 -> "right")
 
   override def sign: String = s
+
+  override def print: String = Console.RED + s + Console.WHITE
 
   override def isMoving: Boolean = true
 
@@ -120,22 +122,22 @@ class Vehicle(s: String, lastDirection: Int = 2, previous: Option[String] = None
 
   override def switchDirection(newPositionSign: String): TrackPart = {
     newPositionSign match {
-      case "-" => new Vehicle(s, lastDirection, Some(newPositionSign))
-      case "|" => new Vehicle(s, lastDirection, Some(newPositionSign))
+      case "-" => new Vehicle(s, lastDirection)
+      case "|" => new Vehicle(s, lastDirection)
       case "\\" => {
         s match {
-          case ">" => new Vehicle("v", lastDirection, Some(newPositionSign))
-          case "v" => new Vehicle(">", lastDirection, Some(newPositionSign))
-          case "^" => new Vehicle("<", lastDirection, Some(newPositionSign))
-          case "<" => new Vehicle("^", lastDirection, Some(newPositionSign))
+          case ">" => new Vehicle("v", lastDirection)
+          case "v" => new Vehicle(">", lastDirection)
+          case "^" => new Vehicle("<", lastDirection)
+          case "<" => new Vehicle("^", lastDirection)
         }
       }
       case "/" => {
         s match {
-          case "^" => new Vehicle(">", lastDirection, Some(newPositionSign))
-          case ">" => new Vehicle("^", lastDirection, Some(newPositionSign))
-          case "v" => new Vehicle("<", lastDirection, Some(newPositionSign))
-          case "<" => new Vehicle("v", lastDirection, Some(newPositionSign))
+          case "^" => new Vehicle(">", lastDirection)
+          case ">" => new Vehicle("^", lastDirection)
+          case "v" => new Vehicle("<", lastDirection)
+          case "<" => new Vehicle("v", lastDirection)
         }
       }
       case "+" => {
@@ -143,48 +145,29 @@ class Vehicle(s: String, lastDirection: Int = 2, previous: Option[String] = None
         directions(d) match {
           case "left" => {
             s match {
-              case ">" => new Vehicle("^", d, Some("+"))
-              case "<" => new Vehicle("v", d, Some("+"))
-              case "^" => new Vehicle("<", d, Some("+"))
-              case "v" => new Vehicle(">", d, Some("+"))
+              case ">" => new Vehicle("^", d)
+              case "<" => new Vehicle("v", d)
+              case "^" => new Vehicle("<", d)
+              case "v" => new Vehicle(">", d)
             }
           }
           case "right" => {
             s match {
-              case ">" => new Vehicle("v", d, Some("+"))
-              case "<" => new Vehicle("^", d, Some("+"))
-              case "^" => new Vehicle(">", d, Some("+"))
-              case "v" => new Vehicle("<", d, Some("+"))
+              case ">" => new Vehicle("v", d)
+              case "<" => new Vehicle("^", d)
+              case "^" => new Vehicle(">", d)
+              case "v" => new Vehicle("<", d)
             }
           }
-          case "straight" => new Vehicle(s, d, Some("+"))
+          case "straight" => new Vehicle(s, d)
           case _ => throw new RuntimeException("Cant move!")
         }
       }
-      case ">" => new Vehicle(s, lastDirection, previous)
-      case "<" => new Vehicle(s, lastDirection, previous)
-      case "^" => new Vehicle(s, lastDirection, previous)
-      case "v" => new Vehicle(s, lastDirection, previous)
       case x => {
         throw new RuntimeException(s"Out of track $x")
       }
     }
   }
-
-  override def previousDirection: TrackPart = {
-    if (previous.isDefined) {
-      TrackPart.create(previous.get)
-    } else {
-      s match {
-        case ">" => new Horizontal
-        case "<" => new Horizontal
-        case "^" => new Vertical
-        case "v" => new Vertical
-        case _ => throw new RuntimeException("Not a vehicle")
-      }
-    }
-  }
-
 }
 
 class Space extends TrackPart {

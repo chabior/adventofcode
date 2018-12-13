@@ -22,8 +22,7 @@ object InputParser {
 
   def main(args: Array[String]): Unit = {
     var track = parse
-    track.print
-    for (i <- 1 to 10000) {
+    for (i <- 1 to 2000) {
       track = track.tick
     }
   }
